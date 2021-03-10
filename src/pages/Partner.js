@@ -6,7 +6,6 @@ import styled from "styled-components";
 import {css} from "styled-components/macro"; //eslint-disable-line
 import illustration from "images/login-illustration.svg";
 import { useFormik } from 'formik';
-import * as yup from 'yup'
 import Header from "components/headers/light.js";
 import Footer from "components/footers/FiveColumnWithInputForm.js";
 import { ReactComponent as LoginIcon } from "feather-icons/dist/icons/log-in.svg";
@@ -26,7 +25,7 @@ const FormContainer = tw.div`w-full flex-1 mt-8`;
 // const DividerTextContainer = tw.div`my-12 border-b text-center relative`;
 // const DividerText = tw.div`leading-none px-2 inline-block text-sm text-gray-600 tracking-wide font-medium bg-white transform -translate-y-1/2 absolute inset-x-0 top-1/2 bg-transparent`;
 
-const Form = tw.form`mx-auto max-w-lg`;
+// const Form = tw.form`mx-auto max-w-lg`;
 const Input = tw.input`w-full px-8 py-4 rounded-lg font-medium bg-gray-100 border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white mt-5 first:mt-0`;
 const Select = tw.select`w-full px-8 py-4 rounded-lg font-medium bg-gray-100 border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white mt-5 first:mt-0`;
 const SubmitButton = styled.button`
@@ -55,7 +54,8 @@ export default ({
 
 }) => {
   const [country, setCountry] = useState([])
-  const [value] = useState('')
+  const [cusine, setCusine] = useState([])
+  // const [value] = useState('')
   const alertCus = useAlert();
     const getCountry = async () => {
       try {
@@ -66,15 +66,28 @@ export default ({
       }
   
     }
+
+    const getCusine = async () => {
+      try {
+        const {data} = await axios.get(REACT_APP_API_URL+ 'cusine')
+        setCusine(data)
+      } catch (error) {
+        console.log(error)
+      }
+  
+    }
   useEffect(()=> {
    getCountry()
+   getCusine()
   },[])
 
   const formik = useFormik({
     initialValues: {
-      
-        "name": "",
-        "street_address": "",
+      "number_of_branches": "",
+       "state": "",
+        "shop_name": "",
+        "designation": "",
+        "detailed_address": "",
         "city": "",
         "country": "",
         "first_name": "",
@@ -86,8 +99,8 @@ export default ({
     },
     onSubmit: async values => {
       // if
-    alert(JSON.stringify(values))
-      const countryData = country.find(c => c.alpha_two_code === values.country);
+    // alert(JSON.stringify(values))
+      // const countryData = country.find(c => c.alpha_two_code === values.country);
         try {
           await axios.post(REACT_APP_API_URL+ 'partner-application', 
           values,
@@ -101,7 +114,7 @@ export default ({
             }
             )
           
-         
+          formik.resetForm();
            
             alertCus.success("Partner application submitted successfully");
            
@@ -142,16 +155,22 @@ export default ({
             <FormContainer>
          
               {/* <Form> */}
-                <Input  onChange={formik.handleChange} value={formik.values.name} name='name' className='w-100' type="text" placeholder="Business Name" />
-                 { formik.touched && formik.errors.name &&  <small style={{color:'red'}}>{formik.errors.name}</small> }
+                <Input  onChange={formik.handleChange} value={formik.values.shop_name} name='shop_name' className='w-100' type="text" placeholder="Business Name" />
+                 { formik.touched && formik.errors.shop_name &&  <small style={{color:'red'}}>{formik.errors.shop_name}</small> }
+                
+                 <Input  onChange={formik.handleChange} value={formik.values.designation} name='designation' className='w-100' type="text" placeholder="Designation" />
+                 { formik.touched && formik.errors.designation &&  <small style={{color:'red'}}>{formik.errors.designation}</small> }
+
+                 <Input  onChange={formik.handleChange} value={formik.values.number_of_branches} name='number_of_branches' className='w-100' type="number" placeholder="Number of branches" />
+                 { formik.touched && formik.errors.number_of_branches &&  <small style={{color:'red'}}>{formik.errors.number_of_branches}</small> }
                 <Input onChange={formik.handleChange} value={formik.values.first_name} name='first_name'  className='w-100' type="text" placeholder="First Name" />
                 { formik.touched && formik.errors.first_name &&  <small style={{color:'red'}}>{formik.errors.first_name}</small> }
                 <Input onChange={formik.handleChange} value={formik.values.last_name} name='last_name' className='w-100' type="text" placeholder="Last Name" />
                 { formik.touched && formik.errors.last_name &&  <small style={{color:'red'}}>{formik.errors.last_name}</small> }
                
 
-                <Input onChange={formik.handleChange} value={formik.values.cusine} name='cusine' className='w-100' type="text" placeholder="Cusine" />
-                { formik.touched && formik.errors.cusine &&  <small style={{color:'red'}}>{formik.errors.cusine}</small> }
+                {/* <Input onChange={formik.handleChange} value={formik.values.cusine} name='cusine' className='w-100' type="text" placeholder="Cusine" />
+                { formik.touched && formik.errors.cusine &&  <small style={{color:'red'}}>{formik.errors.cusine}</small> } */}
                 {/* <Input onChange={formik.handleChange} value={formik.values.firstName} name='cusine' className='w-100' type="text" placeholder="Cusine" /> */}
                 {/* <Input onChange={formik.handleChange} value={formik.values.country} name='country' className='w-100' type="text" placeholder="Country" /> */}
                 <Select onChange={formik.handleChange} value={formik.values.country}  id="country" name="country" autocomplete="country" className="mt-3 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
@@ -159,13 +178,23 @@ export default ({
                  { country.map((data) => <option value={data.uuid}>{data.name}</option>)} 
                 
                 </Select>
-                { formik.touched && formik.errors.country &&  <small style={{color:'red'}}>{formik.errors.country}</small> }
-                <Input onChange={formik.handleChange} value={formik.values.state} name='state' className='w-100' type="text" placeholder="State" />
-                { formik.touched && formik.errors.country &&  <small style={{color:'red'}}>{formik.errors.country}</small> }
-                <Input onChange={formik.handleChange} value={formik.values.street_address} name='street_address' className='w-100' type="text" placeholder="Street Adress" />
-                { formik.touched && formik.errors.street_address &&  <small style={{color:'red'}}>{formik.errors.street_address}</small> }
 
-                <Input onChange={formik.handleChange} value={formik.values.city} name='city' className='w-100' type="text" placeholder="Last Name" />
+                <Select onChange={formik.handleChange} value={formik.values.cusine}  id="cusine" name="cusine" autocomplete="cusine" className="mt-3 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                  <option value={""}>Select Cusine</option>
+                 { cusine.map((data) => <option value={data.uuid}>{data.name}</option>)} 
+                
+                </Select>
+                { formik.touched && formik.errors.country &&  <small style={{color:'red'}}>{formik.errors.country}</small> }
+                {/* <Input onChange={formik.handleChange} value={formik.values.state} name='state' className='w-100' type="text" placeholder="State" />
+                { formik.touched && formik.errors.country &&  <small style={{color:'red'}}>{formik.errors.country}</small> } */}
+               
+                <Input  onChange={formik.handleChange} value={formik.values.state} name='state' className='w-100' type="text" placeholder="State" />
+                 { formik.touched && formik.errors.state &&  <small style={{color:'red'}}>{formik.errors.state}</small> }
+               
+                <Input onChange={formik.handleChange} value={formik.values.detailed_address} name='detailed_address' className='w-100' type="text" placeholder="Detailede Adress" />
+                { formik.touched && formik.errors.detailed_address &&  <small style={{color:'red'}}>{formik.errors.detailed_address}</small> }
+
+                <Input onChange={formik.handleChange} value={formik.values.city} name='city' className='w-100' type="text" placeholder="City" />
                 { formik.touched && formik.errors.city &&  <small style={{color:'red'}}>{formik.errors.city}</small> }
 
                 <Input onChange={formik.handleChange} value={formik.values.email} name='email' type="email" placeholder="Email" />
